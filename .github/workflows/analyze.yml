@@ -50,9 +50,8 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: reports
+          name: reports-${{ github.job }}-${{ github.run_attempt }}
           path: reports
-          overwrite: true
 
       - name: Fail job if analysis failed
         if: steps.analysis.outcome != 'success'
