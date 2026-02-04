@@ -1,0 +1,10 @@
+name: detector_B
+value: 38.1
+tags:
+  - production
+  - run_002
+metadata:
+  date: 2026-01-16
+  operator: Mustafa
+  temperature_celsius: 23.0
+

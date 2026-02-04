@@ -1,0 +1,59 @@
+name: Analyze YAML data
+
+on:
+  push:
+    branches: [ "main" ]
+    paths:
+      - "data/**/*.yml"
+      - "data/**/*.yaml"
+      - "scripts/**"
+      - "requirements.txt"
+      - ".github/workflows/analyze.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run analysis
+        run: |
+          python scripts/analyze.py --input data --output reports
+
+      # Option A: upload report artifacts (recommended, no auto-commits)
+      - name: Upload reports artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: reports
+          path: reports
+
+      # Option B (optional): commit generated reports back to repo
+      # WARNING: committing from CI can create loops unless you guard it.
+      # Uncomment if you really want reports tracked in git.
+      #
+      # - name: Commit reports
+      #   run: |
+      #     git config user.name "github-actions[bot]"
+      #     git config user.email "github-actions[bot]@users.noreply.github.com"
+      #     git add reports
+      #     git commit -m "Update analysis reports" || exit 0
+      #     git push
+

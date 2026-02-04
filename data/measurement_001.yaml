@@ -1,0 +1,11 @@
+name: detector_A
+value: 42.7
+tags:
+  - test
+  - calibration
+  - run_001
+metadata:
+  date: 2026-01-15
+  operator: Mustafa
+  temperature_celsius: 21.4
+
