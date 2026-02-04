@@ -35,8 +35,27 @@ jobs:
           pip install -r requirements.txt
 
       - name: Run analysis
+        id: analysis
+        continue-on-error: true
         run: |
           python scripts/analyze.py --input data --output reports
+
+      - name: Show summary (even if failed)
+        if: always()
+        run: |
+          echo "=== reports/summary.json ==="
+          test -f reports/summary.json && cat reports/summary.json || echo "No summary.json found"
+
+      - name: Upload reports artifact (even if failed)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: reports
+          path: reports
+
+      - name: Fail job if analysis failed
+        if: steps.analysis.outcome != 'success'
+        run: exit 1
 
       # Option A: upload report artifacts (recommended, no auto-commits)
       - name: Upload reports artifact
