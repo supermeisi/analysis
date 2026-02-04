@@ -1,7 +1,7 @@
 import argparse
 import json
 from pathlib import Path
-from datetime import datetime
+from datetime import date, datetime
 
 import yaml
 import pandas as pd
@@ -18,7 +18,12 @@ SCHEMA = {
         "metadata": {
             "type": "object",
             "properties": {
-                "date": {"type": "string"},  # e.g. 2026-01-15
+                "date": {
+                    "anyOf": [
+                        {"type": "string"},  # "2026-01-15"
+                        {"type": "object"}   # PyYAML may parse into datetime.date
+                    ]
+                },
             },
             "additionalProperties": True,
         },
@@ -27,6 +32,15 @@ SCHEMA = {
     "additionalProperties": True,
 }
 
+def normalize_dates(obj):
+    # Convert YAML-parsed date/datetime objects into ISO strings
+    if isinstance(obj, (date, datetime)):
+        return obj.isoformat()
+    if isinstance(obj, dict):
+        return {k: normalize_dates(v) for k, v in obj.items()}
+    if isinstance(obj, list):
+        return [normalize_dates(v) for v in obj]
+    return obj
 
 def load_yaml_file(path: Path):
     with path.open("r", encoding="utf-8") as f:
@@ -110,6 +124,7 @@ def main():
     for p in yaml_files:
         try:
             data = load_yaml_file(p)
+            data = normalize_dates(data)
 
             # Validate YAML structure
             validate(instance=data, schema=SCHEMA)
